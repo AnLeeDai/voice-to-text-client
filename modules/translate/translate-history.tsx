@@ -28,7 +28,7 @@ import {
   getHistory,
   clearHistory,
   deleteHistoryItem,
-  getLocalStorageUsage,
+  getStorageUsage,
   initializeQuotaDetection,
   HistoryItem,
 } from "@/helpers/history-storage";
@@ -52,29 +52,29 @@ export default function TranslateHistory() {
     });
   }, []);
 
-  const loadHistory = () => {
-    const historyData = getHistory();
+  const loadHistory = async () => {
+    const historyData = await getHistory();
     setHistory(historyData);
   };
 
-  const updateStorageUsage = () => {
-    const usage = getLocalStorageUsage();
+  const updateStorageUsage = async () => {
+    const usage = await getStorageUsage();
     setStorageUsage(usage);
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa toàn bộ lịch sử?")) {
-      clearHistory();
+      await clearHistory();
       setHistory([]);
-      updateStorageUsage();
+      await updateStorageUsage();
       toast.success("Đã xóa toàn bộ lịch sử");
     }
   };
 
-  const handleDeleteItem = (id: string) => {
-    deleteHistoryItem(id);
+  const handleDeleteItem = async (id: string) => {
+    await deleteHistoryItem(id);
     setHistory(history.filter((item) => item.id !== id));
-    updateStorageUsage();
+    await updateStorageUsage();
     toast.success("Đã xóa item khỏi lịch sử");
   };
 

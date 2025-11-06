@@ -102,7 +102,7 @@ export default function TranslateMain({
           // Kiểm tra xem có aiResponse hợp lệ không
           if (data.aiResponse && data.aiResponse.china && data.aiResponse.pinyin && data.aiResponse.vietnamese) {
             setResult(data);
-            saveToHistory(data); // Chỉ lưu vào localStorage nếu có aiResponse hợp lệ
+            saveToHistory(data); // Lưu vào IndexedDB (async, không chờ)
             toast.success("Chuyển đổi thành công!");
           } else {
             // Trường hợp có lỗi từ Google GenAI
@@ -139,7 +139,7 @@ export default function TranslateMain({
           // Kiểm tra xem có aiResponse hợp lệ không
           if (data.aiResponse && data.aiResponse.china && data.aiResponse.pinyin && data.aiResponse.vietnamese) {
             setResult(data);
-            saveToHistory(data); // Chỉ lưu vào localStorage nếu có aiResponse hợp lệ
+            saveToHistory(data); // Lưu vào IndexedDB (async, không chờ)
             toast.success("Chuyển đổi thành công!");
           } else {
             // Trường hợp có lỗi từ Google GenAI
