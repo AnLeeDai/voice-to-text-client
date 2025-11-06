@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -21,6 +20,12 @@ import {
 } from "@/components/ui/select";
 import { Upload, Copy, Link2, Send, Cpu, X } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { UseMutateFunction } from "@tanstack/react-query";
+import {
+  TranslateVoiceReqInterface,
+  TranslateVoiceResInterface,
+} from "@/api/interfaces/translate-voice-interface";
 
 const ALLOWED_MODELS = [
   "gemini-2.0-flash-exp",
@@ -28,7 +33,7 @@ const ALLOWED_MODELS = [
   "gemini-2.0-flash",
   "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
-] as const;
+];
 
 interface TranslateResult {
   message: string;
@@ -49,11 +54,23 @@ interface TranslateResult {
   hasAudioFile: boolean;
 }
 
-export default function TranslateMain() {
+interface TranslateMainProps {
+  onTranslateVoice: UseMutateFunction<
+    TranslateVoiceResInterface,
+    Error,
+    TranslateVoiceReqInterface,
+    unknown
+  >;
+}
+
+export default function TranslateMain({
+  onTranslateVoice,
+}: TranslateMainProps) {
   const [voiceUrl, setVoiceUrl] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>(ALLOWED_MODELS[0]);
   const [result, setResult] = useState<TranslateResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
@@ -64,6 +81,63 @@ export default function TranslateMain() {
     if (fileInput) {
       fileInput.value = "";
     }
+  };
+
+  const handleTranslateWithFile = () => {
+    if (!selectedFile) {
+      toast.error("Vui lòng chọn file audio");
+      return;
+    }
+
+    setIsLoading(true);
+    onTranslateVoice(
+      {
+        voice: selectedFile,
+        model: selectedModel,
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          toast.success("Chuyển đổi thành công!");
+          setIsLoading(false);
+        },
+        onError: (error) => {
+          console.error("Translation error:", error);
+          setIsLoading(false);
+        },
+      }
+    );
+  };
+
+  const handleTranslateWithUrl = () => {
+    if (!voiceUrl) {
+      toast.error("Vui lòng nhập URL");
+      return;
+    }
+
+    setIsLoading(true);
+    onTranslateVoice(
+      {
+        voice_url: voiceUrl,
+        model: selectedModel,
+      },
+      {
+        onSuccess: (data) => {
+          setResult(data);
+          toast.success("Chuyển đổi thành công!");
+          setIsLoading(false);
+        },
+        onError: (error) => {
+          console.error("Translation error:", error);
+          setIsLoading(false);
+        },
+      }
+    );
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Đã sao chép vào clipboard!");
   };
 
   return (
@@ -156,9 +230,13 @@ export default function TranslateMain() {
                 </div>
               </div>
             )}
-            <Button className="w-full" disabled={!selectedFile}>
+            <Button
+              className="w-full"
+              disabled={!selectedFile || isLoading}
+              onClick={handleTranslateWithFile}
+            >
               <Send className="mr-2 h-4 w-4" />
-              Chuyển đổi
+              {isLoading ? "Đang xử lý..." : "Chuyển đổi"}
             </Button>
           </CardContent>
         </Card>
@@ -190,9 +268,13 @@ export default function TranslateMain() {
                 Hỗ trợ: Google Drive
               </p>
             </div>
-            <Button className="w-full" disabled={!voiceUrl}>
+            <Button
+              className="w-full"
+              disabled={!voiceUrl || isLoading}
+              onClick={handleTranslateWithUrl}
+            >
               <Send className="mr-2 h-4 w-4" />
-              Chuyển đổi
+              {isLoading ? "Đang xử lý..." : "Chuyển đổi"}
             </Button>
           </CardContent>
         </Card>
@@ -208,18 +290,20 @@ export default function TranslateMain() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl">中文</CardTitle>
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(result.aiResponse.china)}
+                >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <p className="text-lg leading-relaxed whitespace-pre-wrap">
-                  {result.aiResponse.china}
-                </p>
-              </ScrollArea>
+              <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                {result.aiResponse.china}
+              </p>
             </CardContent>
           </Card>
 
@@ -228,18 +312,20 @@ export default function TranslateMain() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl">Pinyin</CardTitle>
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(result.aiResponse.pinyin)}
+                >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <p className="text-lg leading-relaxed">
-                  {result.aiResponse.pinyin}
-                </p>
-              </ScrollArea>
+              <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                {result.aiResponse.pinyin}
+              </p>
             </CardContent>
           </Card>
 
@@ -248,18 +334,20 @@ export default function TranslateMain() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-2xl">Tiếng Việt</CardTitle>
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(result.aiResponse.vietnamese)}
+                >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[600px]">
-                <p className="text-lg leading-relaxed">
-                  {result.aiResponse.vietnamese}
-                </p>
-              </ScrollArea>
+              <p className="text-lg leading-relaxed whitespace-pre-wrap">
+                {result.aiResponse.vietnamese}
+              </p>
             </CardContent>
           </Card>
         </div>

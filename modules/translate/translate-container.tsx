@@ -1,15 +1,12 @@
+"use client";
+
 import TranslateHistory from "./translate-history";
 import TranslateMain from "./translate-main";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Mic, History } from "lucide-react";
+import { useTranslateVoice } from "@/api/hooks/use-translate-voice";
 
 interface TranslateContainerProps {
   readonly children?: React.ReactNode;
@@ -18,6 +15,8 @@ interface TranslateContainerProps {
 export default function TranslateContainer({
   children,
 }: TranslateContainerProps) {
+  const { mutate: mutateTranslateVoice } = useTranslateVoice();
+
   return (
     <div>
       <div className="mb-8 text-center space-y-2">
@@ -50,7 +49,7 @@ export default function TranslateContainer({
         <TabsContent value="translate" className="mt-6">
           <Card>
             <CardContent>
-              <TranslateMain />
+              <TranslateMain onTranslateVoice={mutateTranslateVoice} />
             </CardContent>
           </Card>
         </TabsContent>

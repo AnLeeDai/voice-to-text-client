@@ -17,7 +17,7 @@ instance.defaults.headers.post["Content-Type"] =
   "application/x-www-form-urlencoded";
 
 // check server health on startup
-instance.get("/api/health-check", {
+instance.get("/", {
   timeout: 5000,
 });
 
