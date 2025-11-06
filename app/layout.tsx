@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart-Ticket-Admin",
-  description: "Smart ticket admin",
+  title: "Voice to Text Converter",
+  description:
+    "Chuyển đổi giọng nói của bạn thành văn bản một cách nhanh chóng và chính xác",
 };
 
 export default function RootLayout({

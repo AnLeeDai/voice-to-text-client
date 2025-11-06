@@ -86,7 +86,7 @@ export default function TranslateMain({
 
   const handleTranslateWithFile = () => {
     if (!selectedFile) {
-      toast.error("Vui lòng chọn file audio");
+      toast.error("Vui lòng chọn file âm thanh");
       return;
     }
 
@@ -191,22 +191,32 @@ export default function TranslateMain({
               Tải file lên
             </CardTitle>
             <CardDescription>
-              Chọn file audio từ thiết bị của bạn
+              Chọn file âm thanh từ thiết bị của bạn
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="file-upload">Chọn file audio</Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept="audio/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
+              <Label htmlFor="file-upload">Chọn file âm thanh</Label>
+              <div className="relative">
+                <Input
+                  id="file-upload"
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="flex items-center justify-center w-full h-10 px-3 py-2 text-sm border border-input rounded-md cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors ring-offset-background focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {selectedFile ? selectedFile.name : "Chọn file âm thanh"}
+                </label>
+              </div>
             </div>
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground">
-                Hỗ trợ: MP3, WAV, M4A, AAC, OGG, FLAC và các định dạng audio
+                Hỗ trợ: MP3, WAV, M4A, AAC, OGG, FLAC và các định dạng âm thanh
                 khác
               </p>
             </div>
@@ -252,16 +262,16 @@ export default function TranslateMain({
               Nhập URL
             </CardTitle>
             <CardDescription>
-              Nhập link Google Drive hoặc URL audio
+              Nhập link Google Drive công khai chứa file âm thanh
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="voice-url">URL của file audio</Label>
+              <Label htmlFor="voice-url">URL của file âm thanh</Label>
               <Input
                 id="voice-url"
                 type="url"
-                placeholder="https://drive.google.com/file/d/..."
+                placeholder="https://drive.google.com/file/d/16X874NGu88naagbJJz/view"
                 value={voiceUrl}
                 onChange={(e) => setVoiceUrl(e.target.value)}
               />
