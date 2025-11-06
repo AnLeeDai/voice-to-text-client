@@ -26,6 +26,7 @@ import {
   TranslateVoiceReqInterface,
   TranslateVoiceResInterface,
 } from "@/api/interfaces/translate-voice-interface";
+import { saveToHistory } from "@/helpers/history-storage";
 
 const ALLOWED_MODELS = [
   "gemini-2.0-flash-exp",
@@ -98,6 +99,7 @@ export default function TranslateMain({
       {
         onSuccess: (data) => {
           setResult(data);
+          saveToHistory(data); // Lưu vào localStorage
           toast.success("Chuyển đổi thành công!");
           setIsLoading(false);
         },
@@ -124,6 +126,7 @@ export default function TranslateMain({
       {
         onSuccess: (data) => {
           setResult(data);
+          saveToHistory(data); // Lưu vào localStorage
           toast.success("Chuyển đổi thành công!");
           setIsLoading(false);
         },

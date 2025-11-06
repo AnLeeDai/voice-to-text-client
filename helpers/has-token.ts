@@ -1,7 +1,7 @@
 import CryptoJS from "crypto-js";
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_CRYPTO_SECRET || "";
-const TOKEN_KEY = "smart_ticket_token";
+const TOKEN_KEY = "voice_to_text_token";
 
 /**
  * Mã hóa dữ liệu
