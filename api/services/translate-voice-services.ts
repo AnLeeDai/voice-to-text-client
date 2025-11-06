@@ -3,6 +3,7 @@ import {
   TranslateVoiceReqInterface,
   TranslateVoiceResInterface,
 } from "../interfaces/translate-voice-interface";
+import { fixObjectEncoding } from "@/helpers/encoding-fix";
 
 export async function postTranslateVoice(
   data: TranslateVoiceReqInterface
@@ -31,7 +32,12 @@ export async function postTranslateVoice(
       }
     );
 
-    return response.data;
+    // Fix encoding issues từ server
+    const fixedData = fixObjectEncoding(
+      response.data
+    ) as TranslateVoiceResInterface;
+
+    return fixedData;
   } catch (error) {
     throw error;
   }

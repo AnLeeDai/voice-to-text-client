@@ -29,11 +29,11 @@ import {
 import { saveToHistory } from "@/helpers/history-storage";
 
 const ALLOWED_MODELS = [
+  "gemini-2.0-flash",
   "gemini-2.0-flash-exp",
   "gemini-2.0-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-2.5-flash-lite",
   "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
 ];
 
 interface TranslateResult {
@@ -45,14 +45,15 @@ interface TranslateResult {
     mimeType: string;
     url: string;
   };
-  aiResponse: {
+  aiResponse?: {
     pinyin: string;
     china: string;
     vietnamese: string;
   };
-  model: string;
+  model?: string;
   timestamp: string;
   hasAudioFile: boolean;
+  error?: string;
 }
 
 interface TranslateMainProps {
@@ -98,13 +99,23 @@ export default function TranslateMain({
       },
       {
         onSuccess: (data) => {
-          setResult(data);
-          saveToHistory(data); // Lưu vào localStorage
-          toast.success("Chuyển đổi thành công!");
+          // Kiểm tra xem có aiResponse hợp lệ không
+          if (data.aiResponse && data.aiResponse.china && data.aiResponse.pinyin && data.aiResponse.vietnamese) {
+            setResult(data);
+            saveToHistory(data); // Chỉ lưu vào localStorage nếu có aiResponse hợp lệ
+            toast.success("Chuyển đổi thành công!");
+          } else {
+            // Trường hợp có lỗi từ Google GenAI
+            setResult(null);
+            const errorMessage = data.message || "Không thể lấy dữ liệu từ Google GenAI";
+            toast.error(errorMessage);
+          }
           setIsLoading(false);
         },
         onError: (error) => {
           console.error("Translation error:", error);
+          setResult(null);
+          toast.error("Đã xảy ra lỗi khi chuyển đổi");
           setIsLoading(false);
         },
       }
@@ -125,13 +136,23 @@ export default function TranslateMain({
       },
       {
         onSuccess: (data) => {
-          setResult(data);
-          saveToHistory(data); // Lưu vào localStorage
-          toast.success("Chuyển đổi thành công!");
+          // Kiểm tra xem có aiResponse hợp lệ không
+          if (data.aiResponse && data.aiResponse.china && data.aiResponse.pinyin && data.aiResponse.vietnamese) {
+            setResult(data);
+            saveToHistory(data); // Chỉ lưu vào localStorage nếu có aiResponse hợp lệ
+            toast.success("Chuyển đổi thành công!");
+          } else {
+            // Trường hợp có lỗi từ Google GenAI
+            setResult(null);
+            const errorMessage = data.message || "Không thể lấy dữ liệu từ Google GenAI";
+            toast.error(errorMessage);
+          }
           setIsLoading(false);
         },
         onError: (error) => {
           console.error("Translation error:", error);
+          setResult(null);
+          toast.error("Đã xảy ra lỗi khi chuyển đổi");
           setIsLoading(false);
         },
       }
@@ -268,13 +289,26 @@ export default function TranslateMain({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="voice-url">URL của file âm thanh</Label>
-              <Input
-                id="voice-url"
-                type="url"
-                placeholder="https://drive.google.com/file/d/16X874NGu88naagbJJz/view"
-                value={voiceUrl}
-                onChange={(e) => setVoiceUrl(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="voice-url"
+                  type="url"
+                  placeholder="https://drive.google.com/file/d/16X874NGu88naagbJJz/view"
+                  value={voiceUrl}
+                  onChange={(e) => setVoiceUrl(e.target.value)}
+                  className="pr-10"
+                />
+                {voiceUrl && (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => setVoiceUrl("")}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-xs text-muted-foreground">
@@ -306,7 +340,7 @@ export default function TranslateMain({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(result.aiResponse.china)}
+                  onClick={() => copyToClipboard(result.aiResponse!.china)}
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép
@@ -328,7 +362,7 @@ export default function TranslateMain({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(result.aiResponse.pinyin)}
+                  onClick={() => copyToClipboard(result.aiResponse!.pinyin)}
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép
@@ -350,7 +384,7 @@ export default function TranslateMain({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => copyToClipboard(result.aiResponse.vietnamese)}
+                  onClick={() => copyToClipboard(result.aiResponse!.vietnamese)}
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   Sao chép

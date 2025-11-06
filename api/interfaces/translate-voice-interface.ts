@@ -13,12 +13,13 @@ export interface TranslateVoiceResInterface {
     mimeType: string;
     url: string;
   };
-  aiResponse: {
+  aiResponse?: {
     pinyin: string;
     china: string;
     vietnamese: string;
   };
-  model: string;
+  model?: string;
   timestamp: string;
   hasAudioFile: boolean;
+  error?: string;
 }

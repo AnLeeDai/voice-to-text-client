@@ -9,12 +9,67 @@ const getAuthToken = () => {
 
 const AUTH_TOKEN = getAuthToken();
 
-const instance = axios.create();
+const instance = axios.create({
+  transformResponse: [
+    (data) => {
+      if (typeof data === 'string') {
+        try {
+          // Parse JSON
+          const parsed = JSON.parse(data);
+          
+          // Helper function để fix encoding của string
+          const fixEncoding = (str: string): string => {
+            try {
+              // Nếu string có encoding problem, decode và encode lại
+              // Check if string contains mojibake (garbled text)
+              if (/[\u00C0-\u00FF][\u0080-\u00BF]/.test(str)) {
+                // Convert to bytes array
+                const bytes = new Uint8Array(str.split('').map(c => c.charCodeAt(0) & 0xff));
+                // Decode as UTF-8
+                return new TextDecoder('utf-8').decode(bytes);
+              }
+              return str;
+            } catch {
+              return str;
+            }
+          };
+          
+          // Recursively fix encoding trong object
+          const fixObject = (obj: unknown): unknown => {
+            if (typeof obj === 'string') {
+              return fixEncoding(obj);
+            }
+            if (Array.isArray(obj)) {
+              return obj.map(fixObject);
+            }
+            if (obj && typeof obj === 'object') {
+              const fixed: Record<string, unknown> = {};
+              for (const key in obj) {
+                fixed[key] = fixObject((obj as Record<string, unknown>)[key]);
+              }
+              return fixed;
+            }
+            return obj;
+          };
+          
+          return fixObject(parsed);
+        } catch {
+          return data;
+        }
+      }
+      return data;
+    }
+  ]
+});
 
 instance.defaults.baseURL = process.env.NEXT_PUBLIC_API_URL;
 instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+instance.defaults.headers.common["Accept"] = "application/json; charset=utf-8";
 instance.defaults.headers.post["Content-Type"] =
   "application/x-www-form-urlencoded";
+
+// Đảm bảo response được xử lý đúng encoding
+instance.defaults.responseType = 'json';
 
 // check server health on startup
 instance.get("/", {
